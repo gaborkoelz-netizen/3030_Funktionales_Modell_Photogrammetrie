@@ -3,24 +3,28 @@ import numpy.testing as npt
 
 import os
 import numpy as np
+import numpy.testing as npt
 from skimage import io
+
 
 class TestResultImage(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.img_F = io.imread("docs/F_result.png")
-        cls.img_N = io.imread("docs/N_result.png")
+        module_dir = os.path.dirname(os.path.dirname(__file__))
+        cls.sol_dir = os.path.join(module_dir, "docs")
+        cls.res_dir = os.path.join(module_dir, "res")
+        cls.img_coords = np.load(
+            os.path.join(cls.sol_dir, "img_coords.npy"),
+        )
         return super().setUpClass()
 
-    def test_stored_file(self):
-        files = os.listdir("res")
-        self.assertTrue("result.png" in files)
+    def test_stored_files(self):
+        files = os.listdir(self.res_dir)
+        self.assertTrue("result.png" in files and "image_coords.npy" in files)
 
-    def test_img_content(self):
-        img = io.imread("res/result.png")
-        diff1 = img - self.img_F
-        diff2 = img - self.img_N
-        self.assertTrue(np.allclose(diff1, np.zeros(img.shape)) or np.allclose(diff2, np.zeros(img.shape)))
+    def test_image_coords(self):
+        img_coords = np.load(os.path.join(self.res_dir, "image_coords.npy"))
+        npt.assert_allclose(img_coords, self.img_coords, rtol=1e-5, atol=1e-5)
 
 
 if __name__ == "__main__":
